@@ -1,5 +1,5 @@
 {
-   "accountAssociation": {
+  "accountAssociation": {
     "header": "eyJmaWQiOjQ0ODM4MiwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDI2NjVkNUE5ODk0QTU5NWY5QTZjQTQyZTU0QkQ0QjBFZjQ4Y2FCZDMifQ",
     "payload": "eyJkb21haW4iOiJ0ZXN0LW1pbmktYXBwLXJvc2UudmVyY2VsLmFwcCJ9",
     "signature": "MHgzZmM1ZWVlYjc1ODA2ZmY4MmIxMDI3MmNiM2NlMGQ5ZWNlMWUzOTU1MDcxMWNjMTU2ZDg2YmM5MTA0N2M4MDg3MzdlMzY5OTczNzhjMTczYzY5MzdmOGY2NDNiODcwNDk4YWFiNmYyODdkMjA0M2I0ZmQxYTgwN2Y1MDAyYzU0ZDFj"
@@ -7,12 +7,12 @@
   "frame": {
     "version": "1",
     "name": "Bright Test!",
-    "iconUrl": "https://yoink.party/logo.png",
-    "homeUrl": "https://yoink.party/framesV2/",
-    "imageUrl": "https://yoink.party/framesV2/opengraph-image",
-    "buttonTitle": "🚩 Start",
-    "splashImageUrl": "https://yoink.party/logo.png",
-    "splashBackgroundColor": "#f5f0ec",
+    "iconUrl": "https://test-mini-app-rose.vercel.app/logo.png",
+    "homeUrl": "https://test-mini-app-rose.vercel.app/",
+    "imageUrl": "https://test-mini-app-rose.vercel.app/bg.png",
+    "buttonTitle": "Launch App",
+    "splashImageUrl": "https://test-mini-app-rose.vercel.app/logo.png",
+    "splashBackgroundColor": "#1b1b1b",
     "requiredChains": ["eip155:8453"],
     "requiredCapabilities": [
       "actions.signIn",
