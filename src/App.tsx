@@ -9,8 +9,13 @@ function App() {
 
   return (
     <>
-      <div>Mini App + Vite + TS + React + Wagmi, yelloooo</div>
-      <ConnectMenu />
+      <div className="">
+        <div className="flex items-center gap-2 justify-between w-full">
+          <img src="/logo.png" alt="logo" className="w-10 h-10" />
+          <ConnectMenu />
+        </div>
+        <div className="text-2xl font-bold">Mini App + Vite + TS + React + Wagmi, yelloooo</div>
+      </div>
     </>
   );
 }
