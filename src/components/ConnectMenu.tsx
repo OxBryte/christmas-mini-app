@@ -8,9 +8,6 @@ export default function ConnectMenu() {
     return (
       <div className="flex flex-col items-end gap-3">
         <div className="flex flex-col items-end gap-1">
-          <span className="text-xs text-gray-400 font-medium">
-            Connected account
-          </span>
           <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 rounded-lg border border-gray-700">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             <span className="text-sm font-mono text-gray-200">
