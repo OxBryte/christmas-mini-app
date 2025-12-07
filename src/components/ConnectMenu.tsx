@@ -1,5 +1,4 @@
 import { useAccount, useConnect } from "wagmi";
-import SignButton from "./SignButton";
 
 export default function ConnectMenu() {
   const { isConnected, address } = useAccount();
@@ -19,7 +18,6 @@ export default function ConnectMenu() {
             </span>
           </div>
         </div>
-        <SignButton />
       </div>
     );
   }
