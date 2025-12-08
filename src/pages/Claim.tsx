@@ -18,6 +18,7 @@ export default function Claim() {
   useEffect(() => {
     if (id) {
       const foundGift = getGift(id);
+      console.log(foundGift);
       setGift(foundGift);
       setGiftId(id);
       if (foundGift) {

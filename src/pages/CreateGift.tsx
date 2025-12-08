@@ -25,8 +25,11 @@ export default function CreateGift() {
       setError(hookError.message || "Transaction failed");
     }
   }, [hookError]);
+console.log(giftId);
 
-  const giftUrl = giftId ? `${window.location.origin}/claim/${giftId.toString()}` : "";
+  const giftUrl = giftId
+    ? `${window.location.origin}/claim/${giftId.toString()}`
+    : "";
 
   const handleCopy = () => {
     if (giftUrl) {
@@ -88,7 +91,9 @@ export default function CreateGift() {
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
             <div className="text-6xl mb-4">🎉</div>
-            <h1 className="text-3xl font-bold mb-2">Gift Created Successfully!</h1>
+            <h1 className="text-3xl font-bold mb-2">
+              Gift Created Successfully!
+            </h1>
             <p className="text-gray-400">Share this link with your loved one</p>
           </div>
 
@@ -118,7 +123,9 @@ export default function CreateGift() {
                 onClick={handleShare}
                 className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium"
               >
-                {typeof navigator !== "undefined" && "share" in navigator ? "Share" : "Copy Link"}
+                {typeof navigator !== "undefined" && "share" in navigator
+                  ? "Share"
+                  : "Copy Link"}
               </button>
               <button
                 onClick={() => {
@@ -214,7 +221,6 @@ export default function CreateGift() {
                 : "Confirming transaction..."}
             </div>
           )}
-
 
           <button
             onClick={handleCreate}

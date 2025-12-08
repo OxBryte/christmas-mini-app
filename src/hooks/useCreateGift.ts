@@ -13,7 +13,11 @@ import { hashPin } from "./utils";
 export function useCreateGift() {
   const { writeContractAsync, isPending, error } = useWriteContract();
   const [hash, setHash] = useState<`0x${string}` | undefined>();
-  const { data: receipt, isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+  const {
+    data: receipt,
+    isLoading: isConfirming,
+    isSuccess,
+  } = useWaitForTransactionReceipt({
     hash,
   });
   const [giftId, setGiftId] = useState<bigint | null>(null);
@@ -34,6 +38,7 @@ export function useCreateGift() {
             if (log.topics[1]) {
               const id = BigInt(log.topics[1]);
               setGiftId(id);
+              console.log(id);
               break;
             }
           }
@@ -65,10 +70,11 @@ export function useCreateGift() {
     });
 
     setHash(txHash);
+    console.log(txHash);
     return txHash;
   };
 
-  const reset = () => {
+  const reset: () => void = () => {
     setHash(undefined);
     setGiftId(null);
   };

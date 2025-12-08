@@ -19,6 +19,8 @@ export function saveGift(gift: Gift): void {
 
 export function getGift(id: string): Gift | null {
   const gifts = getGifts();
+  console.log(gifts);
+  console.log(id);
   return gifts[id] || null;
 }
 

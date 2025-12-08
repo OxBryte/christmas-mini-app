@@ -12,6 +12,7 @@ export default function GiftDetails() {
   useEffect(() => {
     if (id) {
       const foundGift = getGift(id);
+      console.log(foundGift);
       setGift(foundGift);
     }
   }, [id]);
