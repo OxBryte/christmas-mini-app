@@ -19,4 +19,3 @@ export function useHasClaimedGift(userAddress: `0x${string}` | undefined) {
     refetch,
   };
 }
-
