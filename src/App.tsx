@@ -6,6 +6,7 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import CreateGift from "./pages/CreateGift";
 import Claim from "./pages/Claim";
+import Admin from "./pages/Admin";
 
 function App() {
   useEffect(() => {
@@ -14,14 +15,15 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Layout>
-        <Routes>
+      <Routes>
+        <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/create" element={<CreateGift />} />
           <Route path="/claim" element={<Claim />} />
           <Route path="/claim/:id" element={<Claim />} />
-        </Routes>
-      </Layout>
+        </Route>
+        <Route path="/0xadmin0x" element={<Admin />} />
+      </Routes>
     </BrowserRouter>
   );
 }
