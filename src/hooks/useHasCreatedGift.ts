@@ -19,4 +19,3 @@ export function useHasCreatedGift(userAddress: `0x${string}` | undefined) {
     refetch,
   };
 }
-
