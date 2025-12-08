@@ -1,7 +1,65 @@
-export const contractAddress = "0x75F2EC390A89d462d9B924326445cD772D2A69Bc";
+export const contractAddress = "0xFf81cB0878dde209ba2A9c6E37C1d3BeC8Bfc7bF";
 
 export const contractABI = [
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousAdmin",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newAdmin",
+        type: "address",
+      },
+    ],
+    name: "AdminChanged",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: false, internalType: "bool", name: "paused", type: "bool" },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "timestamp",
+        type: "uint256",
+      },
+    ],
+    name: "EmergencyPauseToggled",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "admin",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "timestamp",
+        type: "uint256",
+      },
+    ],
+    name: "EmergencyWithdraw",
+    type: "event",
+  },
   {
     anonymous: false,
     inputs: [
@@ -113,7 +171,7 @@ export const contractABI = [
   {
     inputs: [
       { internalType: "uint256", name: "_giftId", type: "uint256" },
-      { internalType: "string", name: "_pin", type: "string" },
+      { internalType: "bytes32", name: "_pinHash", type: "bytes32" },
     ],
     name: "claimGift",
     outputs: [],
@@ -122,12 +180,28 @@ export const contractABI = [
   },
   {
     inputs: [
-      { internalType: "string", name: "_pin", type: "string" },
+      { internalType: "bytes32", name: "_pinHash", type: "bytes32" },
       { internalType: "string", name: "_message", type: "string" },
     ],
     name: "createGift",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "emergencyPaused",
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "address payable", name: "_recipient", type: "address" },
+    ],
+    name: "emergencyWithdraw",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -218,8 +292,22 @@ export const contractABI = [
   },
   {
     inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "getUserClaimCount",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
     name: "getUserClaims",
     outputs: [{ internalType: "uint256[]", name: "", type: "uint256[]" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    name: "getUserGiftCount",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
@@ -261,6 +349,20 @@ export const contractABI = [
     type: "function",
   },
   {
+    inputs: [{ internalType: "address", name: "_address", type: "address" }],
+    name: "isAdmin",
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "toggleEmergencyPause",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "totalClaimers",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
@@ -298,26 +400,6 @@ export const contractABI = [
   {
     inputs: [],
     name: "totalValueLocked",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "address", name: "", type: "address" },
-      { internalType: "uint256", name: "", type: "uint256" },
-    ],
-    name: "userClaims",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "address", name: "", type: "address" },
-      { internalType: "uint256", name: "", type: "uint256" },
-    ],
-    name: "userGifts",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
