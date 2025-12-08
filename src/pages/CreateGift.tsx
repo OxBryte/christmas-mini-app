@@ -39,10 +39,7 @@ export default function CreateGift() {
       return;
     }
 
-    if (!message.trim()) {
-      setError("Please enter a message");
-      return;
-    }
+    // Message is optional, but we'll use empty string if not provided
 
     if (!address) {
       setError("Wallet not connected");
@@ -50,7 +47,7 @@ export default function CreateGift() {
     }
 
     try {
-      createGift(pin, message, amount);
+      createGift(pin, message.trim() || "", amount);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create gift");
     }
