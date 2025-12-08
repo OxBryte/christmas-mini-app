@@ -1,46 +1,42 @@
 /**
- * Convert a bigint gift ID to a 6-character alphanumeric code
- * Uses base36 encoding (0-9, a-z) and pads to 6 characters
+ * Generate a random 6-character alphanumeric code
+ * Ensures the code always contains both letters and numbers
  */
-export function encodeGiftId(giftId: bigint): string {
-  // Convert to base36 (0-9, a-z)
-  let encoded = giftId.toString(36);
-  
-  // Pad with leading zeros to make it 6 characters
-  // If longer than 6, take last 6 characters
-  if (encoded.length < 6) {
-    encoded = encoded.padStart(6, "0");
-  } else if (encoded.length > 6) {
-    encoded = encoded.slice(-6);
-  }
-  
-  return encoded;
-}
+export function generateGiftCode(): string {
+  const letters = "abcdefghijklmnopqrstuvwxyz";
+  const numbers = "0123456789";
+  let code = "";
 
-/**
- * Convert a 6-character alphanumeric code back to bigint gift ID
- */
-export function decodeGiftId(encoded: string): bigint | null {
-  try {
-    // Remove any whitespace and convert to lowercase
-    const cleaned = encoded.trim().toLowerCase();
-    
-    // Validate it's alphanumeric and 6 characters
-    if (!/^[0-9a-z]{6}$/.test(cleaned)) {
-      return null;
-    }
-    
-    // Convert from base36 to bigint
-    return BigInt(parseInt(cleaned, 36));
-  } catch {
-    return null;
+  // Ensure we have at least one letter and one number
+  // Generate 3 random letters and 3 random numbers, then shuffle
+  const letterChars: string[] = [];
+  const numberChars: string[] = [];
+
+  for (let i = 0; i < 3; i++) {
+    letterChars.push(letters[Math.floor(Math.random() * letters.length)]);
+    numberChars.push(numbers[Math.floor(Math.random() * numbers.length)]);
   }
+
+  // Combine and shuffle
+  const allChars = [...letterChars, ...numberChars];
+  for (let i = allChars.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [allChars[i], allChars[j]] = [allChars[j], allChars[i]];
+  }
+
+  return allChars.join("");
 }
 
 /**
  * Validate if a string is a valid gift ID code
  */
 export function isValidGiftIdCode(code: string): boolean {
-  return /^[0-9a-z]{6}$/i.test(code.trim());
+  const cleaned = code.trim().toLowerCase();
+  if (cleaned.length !== 6) return false;
+  if (!/^[0-9a-z]{6}$/.test(cleaned)) return false;
+  
+  // Ensure it has both letters and numbers
+  const hasLetters = /[a-z]/.test(cleaned);
+  const hasNumbers = /[0-9]/.test(cleaned);
+  return hasLetters && hasNumbers;
 }
-
