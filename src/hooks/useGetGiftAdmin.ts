@@ -30,4 +30,3 @@ export function useGetGiftAdmin(giftId: bigint | undefined) {
     refetch,
   };
 }
-
