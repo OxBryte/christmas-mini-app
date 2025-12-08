@@ -12,12 +12,18 @@ export interface GiftBatchData {
   message: string;
 }
 
-export function useGetGiftsBatch(startId: bigint | undefined, count: bigint | undefined) {
+export function useGetGiftsBatch(
+  startId: bigint | undefined,
+  count: bigint | undefined
+) {
   const { data, isLoading, error, refetch } = useReadContract({
     address: contractAddress as `0x${string}`,
     abi: contractABI,
     functionName: "getGiftsBatch",
-    args: startId !== undefined && count !== undefined ? [startId, count] : undefined,
+    args:
+      startId !== undefined && count !== undefined
+        ? [startId, count]
+        : undefined,
     query: {
       enabled: startId !== undefined && count !== undefined,
     },
@@ -30,4 +36,3 @@ export function useGetGiftsBatch(startId: bigint | undefined, count: bigint | un
     refetch,
   };
 }
-
