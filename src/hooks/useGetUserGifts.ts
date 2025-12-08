@@ -19,4 +19,3 @@ export function useGetUserGifts(userAddress: `0x${string}` | undefined) {
     refetch,
   };
 }
-
