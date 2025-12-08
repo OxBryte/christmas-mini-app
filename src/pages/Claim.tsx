@@ -1,55 +1,87 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAccount } from "wagmi";
-import { getGift, updateGift } from "../utils/storage";
+import { useGetGift } from "../hooks/useGetGift";
+import { useClaimGift } from "../hooks/useClaimGift";
+import { useWaitForTransactionReceipt } from "wagmi";
 import { formatEther } from "viem";
 
 export default function Claim() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { address, isConnected } = useAccount();
-  const [giftId, setGiftId] = useState(id || "");
-  const [gift, setGift] = useState(getGift(giftId));
+  const [giftIdInput, setGiftIdInput] = useState(id || "");
+  const [giftId, setGiftId] = useState<bigint | undefined>(
+    id ? BigInt(id) : undefined
+  );
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
-  const [step, setStep] = useState<"input" | "verify" | "claim">(id ? "verify" : "input");
-  const [isPending, setIsPending] = useState(false);
+  const [step, setStep] = useState<"input" | "verify" | "claim">(
+    id ? "verify" : "input"
+  );
 
+  const { gift, isLoading: isLoadingGift, error: giftError, refetch } = useGetGift(giftId);
+  const { claimGift, isPending: isClaiming, error: claimError } = useClaimGift();
+  const [claimHash, setClaimHash] = useState<`0x${string}` | undefined>();
+  const { isLoading: isConfirming, isSuccess: isClaimSuccess } = useWaitForTransactionReceipt({
+    hash: claimHash,
+  });
+
+  // Update giftId when id param changes
   useEffect(() => {
     if (id) {
-      const foundGift = getGift(id);
-      console.log(foundGift);
-      setGift(foundGift);
-      setGiftId(id);
-      if (foundGift) {
+      try {
+        const parsedId = BigInt(id);
+        setGiftId(parsedId);
+        setGiftIdInput(id);
         setStep("verify");
+      } catch {
+        setError("Invalid gift ID");
       }
     }
   }, [id]);
 
+  // Refetch gift after successful claim
+  useEffect(() => {
+    if (isClaimSuccess && giftId) {
+      refetch();
+    }
+  }, [isClaimSuccess, giftId, refetch]);
+
+  // Handle gift errors
+  useEffect(() => {
+    if (giftError) {
+      setError("Failed to load gift. Please check the gift ID.");
+    }
+  }, [giftError]);
+
+  // Handle claim errors
+  useEffect(() => {
+    if (claimError) {
+      setError(claimError.message || "Failed to claim gift");
+    }
+  }, [claimError]);
+
   const handleIdSubmit = () => {
-    if (!giftId) {
+    setError("");
+
+    if (!giftIdInput) {
       setError("Please enter a gift ID");
       return;
     }
 
-    const foundGift = getGift(giftId);
-    if (!foundGift) {
-      setError("Gift not found");
-      return;
+    try {
+      const parsedId = BigInt(giftIdInput);
+      setGiftId(parsedId);
+      setStep("verify");
+    } catch {
+      setError("Invalid gift ID format");
     }
-
-    if (foundGift.claimed) {
-      setError("This gift has already been claimed");
-      return;
-    }
-
-    setGift(foundGift);
-    setError("");
-    setStep("verify");
   };
 
   const handlePinVerify = () => {
+    setError("");
+
     if (!pin) {
       setError("Please enter the PIN");
       return;
@@ -60,8 +92,8 @@ export default function Claim() {
       return;
     }
 
-    if (pin !== gift.pin) {
-      setError("Incorrect PIN");
+    if (gift.claimed) {
+      setError("This gift has already been claimed");
       return;
     }
 
@@ -74,30 +106,17 @@ export default function Claim() {
     setStep("claim");
   };
 
-  const handleClaim = () => {
-    if (!gift || !address) return;
+  const handleClaim = async () => {
+    if (!gift || !address || !giftId) return;
 
-    setIsPending(true);
+    setError("");
 
-    // Note: In production, this would claim from an escrow contract
-    // For demo purposes, we'll mark it as claimed
-    // The actual ETH would be sent from the contract to the claimer
-    setTimeout(() => {
-      updateGift(gift.id, {
-        claimed: true,
-        claimedBy: address,
-        claimedAt: Date.now(),
-      });
-
-      // Update local state
-      setGift({ ...gift, claimed: true, claimedBy: address, claimedAt: Date.now() });
-      setIsPending(false);
-
-      // Redirect after showing success
-      setTimeout(() => {
-        navigate("/");
-      }, 3000);
-    }, 1000);
+    try {
+      const hash = await claimGift(giftId, pin);
+      setClaimHash(hash);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to claim gift");
+    }
   };
 
   if (step === "input") {
@@ -114,8 +133,8 @@ export default function Claim() {
               </label>
               <input
                 type="text"
-                value={giftId}
-                onChange={(e) => setGiftId(e.target.value)}
+                value={giftIdInput}
+                onChange={(e) => setGiftIdInput(e.target.value)}
                 placeholder="Enter gift ID"
                 className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -139,7 +158,65 @@ export default function Claim() {
     );
   }
 
-  if (step === "verify" && gift) {
+  if (step === "verify") {
+    if (isLoadingGift) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+          <div className="text-center">
+            <div className="text-2xl mb-2">Loading gift...</div>
+            <p className="text-gray-400">Please wait</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (!gift) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+          <div className="w-full max-w-md text-center">
+            <h1 className="text-2xl font-bold mb-4">Gift Not Found</h1>
+            <p className="text-gray-400 mb-6">The gift ID you entered doesn't exist</p>
+            <button
+              onClick={() => {
+                setGiftIdInput("");
+                setGiftId(undefined);
+                setStep("input");
+                setError("");
+              }}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+            >
+              Try Another ID
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (gift.claimed) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+          <div className="w-full max-w-md text-center">
+            <div className="text-6xl mb-4">🎁</div>
+            <h1 className="text-2xl font-bold mb-2">Gift Already Claimed</h1>
+            <p className="text-gray-400 mb-6">
+              This gift has already been claimed by {gift.claimedBy.slice(0, 6)}...{gift.claimedBy.slice(-4)}
+            </p>
+            <button
+              onClick={() => {
+                setGiftIdInput("");
+                setGiftId(undefined);
+                setStep("input");
+                setError("");
+              }}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+            >
+              Try Another Gift
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
         <div className="w-full max-w-md">
@@ -150,9 +227,16 @@ export default function Claim() {
             <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
               <div className="text-sm text-gray-400 mb-1">Gift Amount</div>
               <div className="text-2xl font-bold text-white">
-                {formatEther(BigInt(gift.amount))} ETH
+                {formatEther(gift.amount)} ETH
               </div>
             </div>
+
+            {gift.message && (
+              <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                <div className="text-sm text-gray-400 mb-1">Message</div>
+                <div className="text-white">{gift.message}</div>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -192,8 +276,9 @@ export default function Claim() {
     );
   }
 
-  if (step === "claim" && gift) {
+  if (step === "claim" && gift && giftId) {
     const isClaimed = gift.claimed;
+    const isPending = isClaiming || isConfirming;
 
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
@@ -207,35 +292,45 @@ export default function Claim() {
               <div className="text-center space-y-4">
                 <div className="text-6xl mb-4">🎉</div>
                 <p className="text-lg text-green-400 font-medium">
-                  {formatEther(BigInt(gift.amount))} ETH has been claimed!
+                  {formatEther(gift.amount)} ETH has been claimed!
                 </p>
                 <p className="text-sm text-gray-400">
-                  In production, this amount would be sent to your wallet from the escrow contract.
+                  The funds have been sent to your wallet.
                 </p>
-                <p className="text-sm text-gray-400">
-                  Redirecting to home page...
-                </p>
+                <button
+                  onClick={() => navigate("/")}
+                  className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  Go Home
+                </button>
               </div>
             ) : (
               <>
                 <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
                   <div className="text-sm text-gray-400 mb-1">Claiming Amount</div>
                   <div className="text-2xl font-bold text-white">
-                    {formatEther(BigInt(gift.amount))} ETH
+                    {formatEther(gift.amount)} ETH
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-400 text-center">
-                  Click below to claim your gift. In production, this would trigger a transaction 
-                  from the escrow contract to your wallet.
-                </p>
+                {error && (
+                  <div className="bg-red-900/30 border border-red-700 rounded-lg p-3 text-red-400 text-sm">
+                    {error}
+                  </div>
+                )}
+
+                {(isClaiming || isConfirming) && (
+                  <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3 text-blue-400 text-sm">
+                    {isClaiming ? "Waiting for transaction..." : "Confirming transaction..."}
+                  </div>
+                )}
 
                 <button
                   onClick={handleClaim}
                   disabled={isPending}
                   className="w-full px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-lg"
                 >
-                  {isPending ? "Claiming..." : "Claim Gift"}
+                  {isPending ? (isClaiming ? "Claiming..." : "Confirming...") : "Claim Gift"}
                 </button>
               </>
             )}
@@ -247,4 +342,3 @@ export default function Claim() {
 
   return null;
 }
-
