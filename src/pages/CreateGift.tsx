@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { useCreateGift } from "../hooks/useCreateGift";
+import { encodeGiftId } from "../utils/giftId";
 
 export default function CreateGift() {
   const { address } = useAccount();
@@ -25,10 +26,9 @@ export default function CreateGift() {
       setError(hookError.message || "Transaction failed");
     }
   }, [hookError]);
-console.log(giftId);
-
-  const giftUrl = giftId
-    ? `${window.location.origin}/claim/${giftId.toString()}`
+  const giftCode = giftId ? encodeGiftId(giftId) : "";
+  const giftUrl = giftCode
+    ? `${window.location.origin}/claim/${giftCode}`
     : "";
 
   const handleCopy = () => {
@@ -100,7 +100,19 @@ console.log(giftId);
           <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Gift Claim Link
+                Gift Code
+              </label>
+              <div className="px-4 py-3 bg-gray-900 border-2 border-blue-500 rounded-lg text-white font-mono text-2xl text-center tracking-wider mb-2">
+                {giftCode}
+              </div>
+              <p className="text-xs text-gray-500 text-center mb-4">
+                Share this 6-character code with the recipient
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Claim Link
               </label>
               <div className="flex gap-2">
                 <input

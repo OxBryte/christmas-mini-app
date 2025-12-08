@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetGift } from "../hooks/useGetGift";
 import { formatEther } from "viem";
+import { decodeGiftId, encodeGiftId } from "../utils/giftId";
 
 export default function GiftDetails() {
   const { id } = useParams<{ id: string }>();
@@ -15,10 +16,9 @@ export default function GiftDetails() {
 
   useEffect(() => {
     if (id) {
-      try {
-        setGiftId(BigInt(id));
-      } catch {
-        // Invalid ID, giftId remains undefined
+      const decoded = decodeGiftId(id);
+      if (decoded !== null) {
+        setGiftId(decoded);
       }
     }
   }, [id]);
@@ -36,7 +36,9 @@ export default function GiftDetails() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <h1 className="text-2xl font-bold">Gift Not Found</h1>
-        <p className="text-gray-400">The gift you're looking for doesn't exist</p>
+        <p className="text-gray-400">
+          The gift you're looking for doesn't exist
+        </p>
         <button
           onClick={() => navigate("/")}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
@@ -47,7 +49,8 @@ export default function GiftDetails() {
     );
   }
 
-  const shareUrl = `${window.location.origin}/claim/${giftId?.toString()}`;
+  const giftCode = giftId ? encodeGiftId(giftId) : "";
+  const shareUrl = giftCode ? `${window.location.origin}/claim/${giftCode}` : "";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareUrl);
@@ -76,7 +79,9 @@ export default function GiftDetails() {
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
       <div className="w-full max-w-md">
         <h1 className="text-3xl font-bold mb-2 text-center">🎁 Gift Details</h1>
-        <p className="text-gray-400 text-center mb-8">Share this link with your loved one</p>
+        <p className="text-gray-400 text-center mb-8">
+          Share this link with your loved one
+        </p>
 
         <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 space-y-4">
           <div>
@@ -105,14 +110,17 @@ export default function GiftDetails() {
             </label>
             <div className="px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg">
               <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${gift.claimed ? "bg-green-500" : "bg-yellow-500"}`} />
+                <div
+                  className={`w-2 h-2 rounded-full ${gift.claimed ? "bg-green-500" : "bg-yellow-500"}`}
+                />
                 <span className="text-white">
                   {gift.claimed ? "Claimed" : "Unclaimed"}
                 </span>
               </div>
               {gift.claimed && gift.claimedBy && (
                 <p className="text-xs text-gray-400 mt-1">
-                  Claimed by: {gift.claimedBy.slice(0, 6)}...{gift.claimedBy.slice(-4)}
+                  Claimed by: {gift.claimedBy.slice(0, 6)}...
+                  {gift.claimedBy.slice(-4)}
                 </p>
               )}
             </div>
@@ -143,7 +151,9 @@ export default function GiftDetails() {
               onClick={handleShare}
               className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium"
             >
-              {typeof navigator !== "undefined" && "share" in navigator ? "Share" : "Copy Link"}
+              {typeof navigator !== "undefined" && "share" in navigator
+                ? "Share"
+                : "Copy Link"}
             </button>
             <button
               onClick={() => navigate("/")}
