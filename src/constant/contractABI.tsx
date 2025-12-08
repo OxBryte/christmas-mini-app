@@ -1,4 +1,4 @@
-export const contractAddress = "0xFf81cB0878dde209ba2A9c6E37C1d3BeC8Bfc7bF";
+export const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
 
 export const contractABI = [
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },
