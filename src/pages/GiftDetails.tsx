@@ -2,23 +2,24 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetGift } from "../hooks/useGetGift";
 import { formatEther } from "viem";
-import { decodeGiftId, encodeGiftId } from "../utils/giftId";
+import { getGiftIdFromCode } from "../utils/giftCodeMapping";
 
 export default function GiftDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
-  const [giftId, setGiftId] = useState<bigint | undefined>(
-    id ? BigInt(id) : undefined
-  );
+  const [giftId, setGiftId] = useState<bigint | undefined>(undefined);
+  const [giftCode, setGiftCode] = useState("");
 
   const { gift, isLoading, error } = useGetGift(giftId);
 
   useEffect(() => {
     if (id) {
-      const decoded = decodeGiftId(id);
+      // Try to get giftId from code mapping
+      const decoded = getGiftIdFromCode(id);
       if (decoded !== null) {
         setGiftId(decoded);
+        setGiftCode(id.toLowerCase());
       }
     }
   }, [id]);
@@ -49,8 +50,9 @@ export default function GiftDetails() {
     );
   }
 
-  const giftCode = giftId ? encodeGiftId(giftId) : "";
-  const shareUrl = giftCode ? `${window.location.origin}/claim/${giftCode}` : "";
+  const shareUrl = giftCode
+    ? `${window.location.origin}/claim/${giftCode}`
+    : "";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareUrl);
