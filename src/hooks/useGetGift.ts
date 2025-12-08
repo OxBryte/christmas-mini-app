@@ -29,4 +29,3 @@ export function useGetGift(giftId: bigint | undefined) {
     refetch,
   };
 }
-
