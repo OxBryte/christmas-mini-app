@@ -14,7 +14,8 @@ export interface GiftBatchData {
 
 export function useGetGiftsBatch(
   startId: bigint | undefined,
-  count: bigint | undefined
+  count: bigint | undefined,
+  isAdmin: boolean = false // Add admin check parameter
 ) {
   const { data, isLoading, error, refetch } = useReadContract({
     address: contractAddress as `0x${string}`,
@@ -25,7 +26,7 @@ export function useGetGiftsBatch(
         ? [startId, count]
         : undefined,
     query: {
-      enabled: startId !== undefined && count !== undefined,
+      enabled: startId !== undefined && count !== undefined && isAdmin, // Only run if admin
     },
   });
 

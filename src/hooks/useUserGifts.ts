@@ -1,25 +1,19 @@
 import { useReadContract } from "wagmi";
 import { contractAddress, contractABI } from "../constant/contractABI";
 
-export function useUserGifts(
-  userAddress: `0x${string}` | undefined,
-  index: bigint | undefined
-) {
+export function useUserGifts(userAddress: `0x${string}` | undefined) {
   const { data, isLoading, error, refetch } = useReadContract({
     address: contractAddress as `0x${string}`,
     abi: contractABI,
     functionName: "userGifts",
-    args:
-      userAddress !== undefined && index !== undefined
-        ? [userAddress, index]
-        : undefined,
+    args: userAddress !== undefined ? [userAddress] : undefined, // Only address!
     query: {
-      enabled: userAddress !== undefined && index !== undefined,
+      enabled: userAddress !== undefined,
     },
   });
 
   return {
-    giftId: data as bigint | undefined,
+    giftIds: data as bigint[] | undefined, // Array of all gift IDs
     isLoading,
     error,
     refetch,

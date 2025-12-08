@@ -1,17 +1,38 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 import { useCreateGift } from "../hooks/useCreateGift";
+import { useGetGiftsBatch } from "../hooks/useGetGiftsBatch";
+import { contractABI, contractAddress } from "../constant/contractABI";
 
 export default function CreateGift() {
   const navigate = useNavigate();
   const { address } = useAccount();
-  const { createGift, isPending, isConfirming, isSuccess, giftId, error: hookError } = useCreateGift();
+  const {
+    createGift,
+    isPending,
+    isConfirming,
+    isSuccess,
+    giftId,
+    error: hookError,
+  } = useCreateGift();
   const [amount, setAmount] = useState("");
   const [pin, setPin] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+const { data: adminAddress } = useReadContract({
+  address: contractAddress as `0x${string}`,
+  abi: contractABI,
+  functionName: "admin",
+});
+  const isAdmin = address === adminAddress;
+console.log(isAdmin);
+
+
+ const { gifts, isLoading, error: errorGifts } = useGetGiftsBatch(0n, 50n, isAdmin);
+
+  console.log(gifts, isLoading, errorGifts);
   // Navigate to gift details when gift is created
   useEffect(() => {
     if (isSuccess && giftId) {
@@ -56,8 +77,12 @@ export default function CreateGift() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
       <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-2 text-center">Create a Gift 🎁</h1>
-        <p className="text-gray-400 text-center mb-8">Set the amount and PIN for your gift</p>
+        <h1 className="text-3xl font-bold mb-2 text-center">
+          Create a Gift 🎁
+        </h1>
+        <p className="text-gray-400 text-center mb-8">
+          Set the amount and PIN for your gift
+        </p>
 
         <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 space-y-4">
           <div>
@@ -87,7 +112,9 @@ export default function CreateGift() {
               maxLength={20}
               className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <p className="text-xs text-gray-500 mt-1">The recipient will need this PIN to claim</p>
+            <p className="text-xs text-gray-500 mt-1">
+              The recipient will need this PIN to claim
+            </p>
           </div>
 
           <div>
@@ -102,7 +129,9 @@ export default function CreateGift() {
               maxLength={500}
               className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
-            <p className="text-xs text-gray-500 mt-1">{message.length}/500 characters</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {message.length}/500 characters
+            </p>
           </div>
 
           {error && (
@@ -113,7 +142,9 @@ export default function CreateGift() {
 
           {(isPending || isConfirming) && (
             <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3 text-blue-400 text-sm">
-              {isPending ? "Waiting for transaction..." : "Confirming transaction..."}
+              {isPending
+                ? "Waiting for transaction..."
+                : "Confirming transaction..."}
             </div>
           )}
 
@@ -141,4 +172,3 @@ export default function CreateGift() {
     </div>
   );
 }
-

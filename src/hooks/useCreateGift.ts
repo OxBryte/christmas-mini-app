@@ -5,7 +5,11 @@ import { useEffect, useState } from "react";
 
 export function useCreateGift() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
-  const { data: receipt, isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+  const {
+    data: receipt,
+    isLoading: isConfirming,
+    isSuccess,
+  } = useWaitForTransactionReceipt({
     hash,
   });
   const [giftId, setGiftId] = useState<bigint | null>(null);
@@ -21,7 +25,7 @@ export function useCreateGift() {
             data: log.data,
             topics: log.topics,
           });
-          
+
           if (decoded.eventName === "GiftCreated") {
             // For indexed events, args might be an array or object
             // giftId is the first indexed parameter, so it's in topics[1]
