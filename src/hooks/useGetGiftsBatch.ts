@@ -1,22 +1,19 @@
 import { useReadContract } from "wagmi";
 import { contractAddress, contractABI } from "../constant/contractABI";
+import { useIsAdmin } from "./useIsAdmin";
+import type { GiftBatchData } from "./types";
 
-export interface GiftBatchData {
-  creator: `0x${string}`;
-  amount: bigint;
-  pinHash: `0x${string}`;
-  claimed: boolean;
-  claimedBy: `0x${string}`;
-  createdAt: bigint;
-  claimedAt: bigint;
-  message: string;
-}
-
+/**
+ * Get batch of gifts (Admin only)
+ * @param startId - Starting gift ID
+ * @param count - Number of gifts to fetch
+ */
 export function useGetGiftsBatch(
   startId: bigint | undefined,
-  count: bigint | undefined,
-  isAdmin: boolean = false // Add admin check parameter
+  count: bigint | undefined
 ) {
+  const { isAdmin } = useIsAdmin();
+
   const { data, isLoading, error, refetch } = useReadContract({
     address: contractAddress as `0x${string}`,
     abi: contractABI,
@@ -26,7 +23,7 @@ export function useGetGiftsBatch(
         ? [startId, count]
         : undefined,
     query: {
-      enabled: startId !== undefined && count !== undefined && isAdmin, // Only run if admin
+      enabled: startId !== undefined && count !== undefined && isAdmin,
     },
   });
 
@@ -37,3 +34,5 @@ export function useGetGiftsBatch(
     refetch,
   };
 }
+
+export type { GiftBatchData };

@@ -2,23 +2,28 @@ import { useWriteContract } from "wagmi";
 import { contractAddress, contractABI } from "../constant/contractABI";
 
 /**
- * Cancel a gift
+ * Emergency withdraw (Admin only)
  */
-export function useCancelGift() {
+export function useEmergencyWithdraw() {
   const { writeContractAsync, isPending, error } = useWriteContract();
 
-  const cancelGift = async (giftId: bigint) => {
+  const emergencyWithdraw = async (recipient: `0x${string}`) => {
+    if (!recipient) {
+      throw new Error("Recipient address is required");
+    }
+
     return await writeContractAsync({
       address: contractAddress as `0x${string}`,
       abi: contractABI,
-      functionName: "cancelGift",
-      args: [giftId],
+      functionName: "emergencyWithdraw",
+      args: [recipient],
     });
   };
 
   return {
-    cancelGift,
+    emergencyWithdraw,
     isPending,
     error,
   };
 }
+

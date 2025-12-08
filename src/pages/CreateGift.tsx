@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount } from "wagmi";
 import { useCreateGift } from "../hooks/useCreateGift";
-import { useGetGiftsBatch } from "../hooks/useGetGiftsBatch";
-import { contractABI, contractAddress } from "../constant/contractABI";
 
 export default function CreateGift() {
   const navigate = useNavigate();
@@ -21,18 +19,6 @@ export default function CreateGift() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-const { data: adminAddress } = useReadContract({
-  address: contractAddress as `0x${string}`,
-  abi: contractABI,
-  functionName: "admin",
-});
-  const isAdmin = address === adminAddress;
-console.log(isAdmin);
-
-
- const { gifts, isLoading, error: errorGifts } = useGetGiftsBatch(0n, 50n, isAdmin);
-
-  console.log(gifts, isLoading, errorGifts);
   // Navigate to gift details when gift is created
   useEffect(() => {
     if (isSuccess && giftId) {
@@ -47,7 +33,7 @@ console.log(isAdmin);
     }
   }, [hookError]);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     setError("");
 
     if (!amount || parseFloat(amount) <= 0) {
@@ -68,7 +54,7 @@ console.log(isAdmin);
     }
 
     try {
-      createGift(pin, message.trim() || "", amount);
+      await createGift(pin, message.trim() || "", amount);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create gift");
     }

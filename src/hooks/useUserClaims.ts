@@ -1,25 +1,23 @@
 import { useReadContract } from "wagmi";
 import { contractAddress, contractABI } from "../constant/contractABI";
 
-export function useUserClaims(
-  userAddress: `0x${string}` | undefined,
-  index: bigint | undefined
-) {
+/**
+ * Get all gifts claimed by a user
+ * @param userAddress - The user's wallet address
+ */
+export function useUserClaims(userAddress: `0x${string}` | undefined) {
   const { data, isLoading, error, refetch } = useReadContract({
     address: contractAddress as `0x${string}`,
     abi: contractABI,
-    functionName: "userClaims",
-    args:
-      userAddress !== undefined && index !== undefined
-        ? [userAddress, index]
-        : undefined,
+    functionName: "getUserClaims",
+    args: userAddress ? [userAddress] : undefined,
     query: {
-      enabled: userAddress !== undefined && index !== undefined,
+      enabled: !!userAddress,
     },
   });
 
   return {
-    claimId: data as bigint | undefined,
+    giftIds: data as bigint[] | undefined,
     isLoading,
     error,
     refetch,

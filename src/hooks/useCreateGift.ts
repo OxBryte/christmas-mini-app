@@ -1,15 +1,19 @@
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { contractAddress, contractABI } from "../constant/contractABI";
-import { parseEther, decodeEventLog } from "viem";
+import { decodeEventLog } from "viem";
 import { useEffect, useState } from "react";
+import { hashPin } from "./utils";
 
+/**
+ * Create a new gift
+ * Usage:
+ * const { createGift, isPending, isSuccess, giftId } = useCreateGift();
+ * await createGift(pin, message, amountInEth);
+ */
 export function useCreateGift() {
-  const { writeContract, data: hash, isPending, error } = useWriteContract();
-  const {
-    data: receipt,
-    isLoading: isConfirming,
-    isSuccess,
-  } = useWaitForTransactionReceipt({
+  const { writeContractAsync, isPending, error } = useWriteContract();
+  const [hash, setHash] = useState<`0x${string}` | undefined>();
+  const { data: receipt, isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
   const [giftId, setGiftId] = useState<bigint | null>(null);
@@ -17,7 +21,6 @@ export function useCreateGift() {
   useEffect(() => {
     if (receipt) {
       // Parse the GiftCreated event to get the giftId
-      // The giftId is in the first indexed topic (topics[1])
       for (const log of receipt.logs) {
         try {
           const decoded = decodeEventLog({
@@ -27,7 +30,6 @@ export function useCreateGift() {
           });
 
           if (decoded.eventName === "GiftCreated") {
-            // For indexed events, args might be an array or object
             // giftId is the first indexed parameter, so it's in topics[1]
             if (log.topics[1]) {
               const id = BigInt(log.topics[1]);
@@ -36,22 +38,34 @@ export function useCreateGift() {
             }
           }
         } catch {
-          // Not the event we're looking for, continue
           continue;
         }
       }
     }
   }, [receipt]);
 
-  const createGift = (pin: string, message: string, amount: string) => {
+  const createGift = async (
+    pin: string,
+    message: string,
+    amountInEth: string
+  ) => {
+    if (!pin || pin.length < 4) {
+      throw new Error("PIN must be at least 4 characters");
+    }
+
     setGiftId(null);
-    writeContract({
+    const pinHash = hashPin(pin);
+
+    const txHash = await writeContractAsync({
       address: contractAddress as `0x${string}`,
       abi: contractABI,
       functionName: "createGift",
-      args: [pin, message],
-      value: parseEther(amount),
+      args: [pinHash, message],
+      value: BigInt(parseFloat(amountInEth) * 1e18), // Convert ETH to Wei
     });
+
+    setHash(txHash);
+    return txHash;
   };
 
   return {

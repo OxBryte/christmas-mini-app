@@ -2,23 +2,23 @@ import { useWriteContract } from "wagmi";
 import { contractAddress, contractABI } from "../constant/contractABI";
 
 /**
- * Cancel a gift
+ * Toggle emergency pause (Admin only)
  */
-export function useCancelGift() {
+export function useToggleEmergencyPause() {
   const { writeContractAsync, isPending, error } = useWriteContract();
 
-  const cancelGift = async (giftId: bigint) => {
+  const togglePause = async () => {
     return await writeContractAsync({
       address: contractAddress as `0x${string}`,
       abi: contractABI,
-      functionName: "cancelGift",
-      args: [giftId],
+      functionName: "toggleEmergencyPause",
     });
   };
 
   return {
-    cancelGift,
+    togglePause,
     isPending,
     error,
   };
 }
+

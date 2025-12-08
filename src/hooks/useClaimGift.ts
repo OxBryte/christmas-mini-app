@@ -1,27 +1,34 @@
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useWriteContract } from "wagmi";
 import { contractAddress, contractABI } from "../constant/contractABI";
+import { hashPin } from "./utils";
 
+/**
+ * Claim a gift
+ * Usage:
+ * const { claimGift, isPending } = useClaimGift();
+ * await claimGift(giftId, pin);
+ */
 export function useClaimGift() {
-  const { writeContract, data: hash, isPending, error } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash,
-  });
+  const { writeContractAsync, isPending, error } = useWriteContract();
 
-  const claimGift = (giftId: bigint, pin: string) => {
-    writeContract({
+  const claimGift = async (giftId: bigint, pin: string) => {
+    if (!pin) {
+      throw new Error("PIN is required");
+    }
+
+    const pinHash = hashPin(pin);
+
+    return await writeContractAsync({
       address: contractAddress as `0x${string}`,
       abi: contractABI,
       functionName: "claimGift",
-      args: [giftId, pin],
+      args: [giftId, pinHash],
     });
   };
 
   return {
     claimGift,
-    hash,
     isPending,
-    isConfirming,
-    isSuccess,
     error,
   };
 }
