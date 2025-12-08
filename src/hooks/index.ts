@@ -24,4 +24,3 @@ export { useTotalValueClaimed } from "./useTotalValueClaimed";
 export { useTotalValueLocked } from "./useTotalValueLocked";
 export { useUserClaims } from "./useUserClaims";
 export { useUserGifts } from "./useUserGifts";
-
