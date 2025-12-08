@@ -19,4 +19,3 @@ export function useGetUserClaims(userAddress: `0x${string}` | undefined) {
     refetch,
   };
 }
-
