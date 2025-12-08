@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAccount } from "wagmi";
 import { useCreateGift } from "../hooks/useCreateGift";
 
 export default function CreateGift() {
-  const navigate = useNavigate();
   const { address } = useAccount();
   const {
     createGift,
@@ -13,18 +11,13 @@ export default function CreateGift() {
     isSuccess,
     giftId,
     error: hookError,
+    reset,
   } = useCreateGift();
   const [amount, setAmount] = useState("");
   const [pin, setPin] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-
-  // Navigate to gift details when gift is created
-  useEffect(() => {
-    if (isSuccess && giftId) {
-      navigate(`/gift/${giftId.toString()}`);
-    }
-  }, [isSuccess, giftId, navigate]);
+  const [copied, setCopied] = useState(false);
 
   // Handle hook errors
   useEffect(() => {
@@ -32,6 +25,34 @@ export default function CreateGift() {
       setError(hookError.message || "Transaction failed");
     }
   }, [hookError]);
+
+  const giftUrl = giftId ? `${window.location.origin}/claim/${giftId.toString()}` : "";
+
+  const handleCopy = () => {
+    if (giftUrl) {
+      navigator.clipboard.writeText(giftUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleShare = async () => {
+    if (giftUrl && navigator.share) {
+      try {
+        await navigator.share({
+          title: "Christmas Gift",
+          text: "You've been gifted! Claim your gift here:",
+          url: giftUrl,
+        });
+      } catch (err) {
+        // User cancelled or error occurred
+        console.log("Share cancelled or failed:", err);
+      }
+    } else {
+      // Fallback to copy if share is not available
+      handleCopy();
+    }
+  };
 
   const handleCreate = async () => {
     setError("");
@@ -59,6 +80,66 @@ export default function CreateGift() {
       setError(err instanceof Error ? err.message : "Failed to create gift");
     }
   };
+
+  // Show success view when gift is created
+  if (isSuccess && giftId) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-6">
+            <div className="text-6xl mb-4">🎉</div>
+            <h1 className="text-3xl font-bold mb-2">Gift Created Successfully!</h1>
+            <p className="text-gray-400">Share this link with your loved one</p>
+          </div>
+
+          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Gift Claim Link
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={giftUrl}
+                  readOnly
+                  className="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white text-sm"
+                />
+                <button
+                  onClick={handleCopy}
+                  className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
+                >
+                  {copied ? "✓ Copied" : "Copy"}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleShare}
+                className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium"
+              >
+                {typeof navigator !== "undefined" && "share" in navigator ? "Share" : "Copy Link"}
+              </button>
+              <button
+                onClick={() => {
+                  // Reset form and hook state
+                  setAmount("");
+                  setPin("");
+                  setMessage("");
+                  setError("");
+                  setCopied(false);
+                  reset();
+                }}
+                className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
+              >
+                Create Another
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
@@ -134,11 +215,6 @@ export default function CreateGift() {
             </div>
           )}
 
-          {isSuccess && (
-            <div className="bg-green-900/30 border border-green-700 rounded-lg p-3 text-green-400 text-sm">
-              Gift created successfully! Redirecting...
-            </div>
-          )}
 
           <button
             onClick={handleCreate}

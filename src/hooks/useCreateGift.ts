@@ -68,6 +68,11 @@ export function useCreateGift() {
     return txHash;
   };
 
+  const reset = () => {
+    setHash(undefined);
+    setGiftId(null);
+  };
+
   return {
     createGift,
     hash,
@@ -76,5 +81,6 @@ export function useCreateGift() {
     isSuccess,
     giftId,
     error,
+    reset,
   };
 }
