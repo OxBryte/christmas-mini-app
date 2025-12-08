@@ -30,4 +30,3 @@ export function useGifts(giftId: bigint | undefined) {
     refetch,
   };
 }
-
