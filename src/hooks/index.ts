@@ -1,6 +1,3 @@
-// Types
-export type { GiftData, GiftBatchData, PlatformStats } from "./types";
-
 // Utils
 export { hashPin } from "./utils";
 

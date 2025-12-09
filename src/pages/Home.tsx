@@ -1,12 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useAccount } from "wagmi";
 import SignButton from "../components/SignButton";
-import { useState } from "react";
 
 export default function Home() {
   const navigate = useNavigate();
   const { isConnected } = useAccount();
-  const [hasSigned, setHasSigned] = useState(false);
 
   if (!isConnected) {
     return (
@@ -34,7 +32,6 @@ export default function Home() {
         <SignButton
           required
           onSigned={() => {
-            setHasSigned(true);
             navigate("/create");
           }}
         />

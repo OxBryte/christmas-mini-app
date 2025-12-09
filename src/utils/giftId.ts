@@ -5,7 +5,6 @@
 export function generateGiftCode(): string {
   const letters = "abcdefghijklmnopqrstuvwxyz";
   const numbers = "0123456789";
-  let code = "";
 
   // Ensure we have at least one letter and one number
   // Generate 3 random letters and 3 random numbers, then shuffle
