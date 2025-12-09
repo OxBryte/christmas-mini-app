@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useSignMessage } from "wagmi";
 
 interface SignButtonProps {
@@ -11,11 +11,9 @@ export default function SignButton({
   required = true,
 }: SignButtonProps) {
   const { signMessage, isPending, data, error } = useSignMessage();
-  const [hasSigned, setHasSigned] = useState(false);
 
   useEffect(() => {
     if (data) {
-      setHasSigned(true);
       required && onSigned?.();
     }
   }, [data, onSigned, required]);
